@@ -22,6 +22,10 @@ export async function getStaticProps() {
 export default function Home({ pokemon }: { pokemon: Pokemon[] }) {
   const [filtered, setFiltered] = useState("")
 
+  // useMemo is a React hook that caches the result of a function call.
+  // It's useful for caching the result of an expensive function call.
+  // The function call is only made once, and the result is cached for future use.
+  // If the function call is expensive, useMemo is a good choice.
   const filteredPokemon = useMemo(
     () => pokemon.filter((p) => p.name.toLowerCase().includes(filtered.toLowerCase())), [filtered])
 
