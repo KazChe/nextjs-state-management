@@ -23,9 +23,7 @@ export default function Home({ pokemon }: { pokemon: Pokemon[] }) {
   const [filtered, setFiltered] = useState("")
 
   const filteredPokemon = useMemo(
-    () => 
-    pokemon.filter((p) => p.name.toLowerCase().includes(filtered.toLowerCase()))
-  )
+    () => pokemon.filter((p) => p.name.toLowerCase().includes(filtered.toLowerCase())), [filtered, pokemon])
 
   return (
     <div className={styles.main}>
