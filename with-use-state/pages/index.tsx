@@ -9,7 +9,7 @@ interface Pokemon {
   image: string;
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const resp = await fetch("https://jherr-pokemon.s3.us-west-1.amazonaws.com/index.json")
 
   return {
