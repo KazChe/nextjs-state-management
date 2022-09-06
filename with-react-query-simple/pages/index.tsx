@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import Head from "next/head";
-import Link from "next/link";
+import { dehydrate, useQuery, QueryClient } from "react-query";
+
 import styles from "../styles/Home.module.css";
 
 interface Pokemon {
@@ -9,18 +10,29 @@ interface Pokemon {
   image: string;
 }
 
-export async function getServerSideProps() {
-  const resp = await fetch(
-    "https://jherr-pokemon.s3.us-west-1.amazonaws.com/index.json"
+const getPokemon = (): Promise<Pokemon[]> =>
+  fetch("https://jherr-pokemon.s3.us-west-1.amazonaws.com/index.json").then(
+    (resp) => resp.json()
   );
+
+export async function getServerSideProps() {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery("pokemon", getPokemon);
+
   return {
     props: {
-      pokemon: await resp.json(),
+      dehydratedState: dehydrate(queryClient),
     },
   };
 }
 
-export default function Home({ pokemon }: { pokemon: Pokemon[] }) {
+export default function Home() {
+  const { data: pokemon } = useQuery("pokemon", getPokemon, {
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+
   const [filter, setFilter] = useState("");
 
   const filteredPokemon = useMemo(
@@ -47,20 +59,7 @@ export default function Home({ pokemon }: { pokemon: Pokemon[] }) {
         />
       </div>
       <div className={styles.container}>
-      {filteredPokemon.map((pokemon) => (
-          <div className={styles.image} key={pokemon.id}>
-            <Link href={`/pokemon/${pokemon.id}`}>
-              <a>
-                <img
-                  src={`https://jherr-pokemon.s3.us-west-1.amazonaws.com/${pokemon.image}`}
-                  alt={pokemon.name}
-                />
-                <h3>{pokemon.name}</h3>
-              </a>
-            </Link>
-          </div>
-        ))}
-        {/* {filteredPokemon.slice(0, 801).map((p) => (
+        {filteredPokemon.slice(0, 20).map((p) => (
           <div key={p.id} className={styles.image}>
             <img
               alt={p.name}
@@ -68,7 +67,7 @@ export default function Home({ pokemon }: { pokemon: Pokemon[] }) {
             />
             <h2>{p.name}</h2>
           </div>
-        ))} */}
+        ))}
       </div>
     </div>
   );
